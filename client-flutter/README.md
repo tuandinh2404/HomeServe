@@ -1,17 +1,20 @@
-# homeserve_flutter
+# HomeServe – Ứng dụng khách hàng (Flutter)
 
-A new Flutter project.
+Ứng dụng di động cho khách hàng đặt dịch vụ sửa chữa tại nhà, kết nối với backend HomeServe.
 
-## Getting Started
+## Tính năng chính
+- Đăng ký / đăng nhập, lưu token.
+- Xem danh mục và danh sách dịch vụ, chi tiết giá sàn – giá trần.
+- Tạo yêu cầu dịch vụ (mô tả, địa chỉ, khu vực, thời gian mong muốn, ảnh).
+- Theo dõi danh sách và chi tiết yêu cầu, trạng thái tiến trình.
+- Hủy yêu cầu, thanh toán, đánh giá thợ, gửi khiếu nại.
+- Hồ sơ cá nhân.
 
-This project is a starting point for a Flutter application.
+## Chạy ứng dụng
+```bash
+flutter pub get
+flutter run
+```
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Mặc định ứng dụng dùng dữ liệu mẫu (mock) để giao diện chạy được ngay cả khi backend chưa sẵn sàng.
+Để gọi backend thật, đặt `ApiService.useMock = false` và cập nhật `AppConstants.apiBaseUrl`.
