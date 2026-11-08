@@ -22,8 +22,8 @@ Khách hàng **không** dùng app này. Khách dùng app Flutter.
 
 | Người | Phần |
 |---|---|
-| **Tuấn** (nhóm trưởng) | Khung dùng chung (`data/`, `common/`), đăng nhập, 2 MainActivity, báo cáo + biểu đồ, công nợ thợ. Xem mọi PR |
-| **Thông** | Toàn bộ màn hình nghiệp vụ còn lại của Quản trị và Thợ (mục 5) |
+| **Tuấn** (nhóm trưởng) | Khung dùng chung (`data/`, `common/`), Splash, 2 MainActivity + thanh tab, báo cáo + biểu đồ, công nợ thợ. Xem mọi PR |
+| **Thông** | **Màn đăng nhập** (mục 5.0) và toàn bộ màn hình nghiệp vụ của Quản trị và Thợ (mục 5.1–5.8) |
 | Tâm | Backend (API). Hỏi Tâm khi API trả sai |
 
 ---
@@ -52,7 +52,7 @@ app/src/main/java/com/app/homeserve/
 ├── data/                         [DÙNG CHUNG – Tuấn dựng, Thông chỉ dùng]
 │   ├── api/
 │   │   ├── ApiClient.java        Tạo Retrofit 1 lần, tự gắn token, gặp 401 thì về đăng nhập
-│   │   ├── AuthApi.java          [Tuấn]
+│   │   ├── AuthApi.java          [Thông bổ sung hàm]
 │   │   ├── DanhMucApi.java       [Thông bổ sung hàm]
 │   │   ├── HoSoThoApi.java       [Thông bổ sung hàm]
 │   │   ├── YeuCauApi.java        [Thông bổ sung hàm]
@@ -63,13 +63,14 @@ app/src/main/java/com/app/homeserve/
 │   │                             YeuCau, PhanCong, BaoGiaChiTiet, KhieuNai, LoiApi
 │   └── TokenStore.java           Lưu / đọc / xóa token và vai trò
 ├── common/                       [DÙNG CHUNG – Tuấn]
-│   ├── HangSo.java               Vai trò và mọi trạng thái, viết y hệt api.md
-│   ├── StateView.java            Khung 3 trạng thái: đang tải / có dữ liệu / lỗi mạng
+│   ├── HangSo.java               Vai trò và mọi trạng thái, viết y hệt api.md            ✅ đã có
+│   ├── LoiApiHelper.java         Đọc {"loi": "...", "truong": "..."} từ response lỗi       ✅ đã có
+│   ├── StateView.java            Khung 3 trạng thái: đang tải / có dữ liệu / rỗng / lỗi    ✅ đã có
+│   ├── DieuHuong.java            Mở màn chính theo vai trò, mở màn đăng nhập             ✅ đã có
 │   ├── XacNhanDialog.java        Hộp xác nhận trước khi xóa hoặc làm việc không hoàn tác được
-│   ├── LoiApiHelper.java         Đọc {"loi": "..."} từ response lỗi
 │   └── TienTe.java               Định dạng 150000 → "150.000 đ"
 └── ui/
-    ├── auth/                     [Tuấn]   SplashActivity, LoginActivity
+    ├── auth/                     [Tuấn]   SplashActivity    [THÔNG]  LoginActivity
     ├── admin/
     │   ├── AdminMainActivity     [Tuấn]   Thanh tab dưới + gắn fragment
     │   ├── danhmuc/              [THÔNG]  Danh mục, dịch vụ, giá sàn / giá trần
@@ -202,32 +203,65 @@ Tên hàm cụ thể xem trong code khung. Bảng dưới cho biết **file nào
 |---|---|---|
 | `ApiClient` | Gọi bất kỳ API nào | Token tự gắn vào header. **Không** tự thêm `Authorization`. Gặp `401` thì ApiClient tự xóa token và về màn đăng nhập, màn hình của mình không cần xử lý `401` |
 | `TokenStore` | Cần biết người đang đăng nhập là ai, vai trò gì | Chỉ đọc, không tự ghi |
-| `HangSo` | So sánh vai trò / trạng thái | Viết `HangSo.CHO_NHAN`, **không** gõ tay `"CHO_NHAN"` |
-| `StateView` | Mọi màn hình có gọi API | Gọi API → `đang tải`. Thành công → `có dữ liệu` (danh sách rỗng thì hiện "Chưa có dữ liệu"). Lỗi mạng → `lỗi` + nút **Thử lại** |
+| `HangSo` | So sánh vai trò / trạng thái, hiện trạng thái cho người dùng | Viết `HangSo.TrangThaiYeuCau.CHO_NHAN`, **không** gõ tay `"CHO_NHAN"`. Hiện chữ tiếng Việt: `HangSo.tenHienThi(yeuCau.trangThai)` → "Chờ nhận" |
+| `LoiApiHelper` | Response không thành công (400, 403, 404, 409, 500) | `LoiApiHelper.thongBao(res)` → câu để hiện. Cần biết ô nào sai thì `LoiApiHelper.doc(res)` → `.thongBao` + `.truong`. Mất mạng dùng `LoiApiHelper.LOI_MANG`. Mỗi response chỉ đọc lỗi **1 lần** |
+| `StateView` | Mọi màn hình có gọi API | Bọc RecyclerView trong layout (xem mẫu dưới). `showLoading()` → `showContent()` / `showEmpty("...")` / `showError("...")`. Gắn `setOnThuLai(...)` thì lỗi có nút **Thử lại** |
+| `DieuHuong` | Sau khi đăng nhập xong | `DieuHuong.moManChinh(this, vaiTro)` tự mở Admin hoặc Thợ và xóa màn cũ. Trả `false` nếu vai trò là `KHACH` / lạ |
 | `XacNhanDialog` | Xóa, từ chối, duyệt, gán thợ | Chỉ gọi API sau khi người dùng bấm đồng ý |
-| `LoiApiHelper` | Response không thành công (400, 403, 404, 409) | Lấy câu trong `"loi"` để hiện cho người dùng |
 | `TienTe` | Hiện số tiền | Gửi lên API vẫn là số nguyên `150000` |
 
-Mẫu gọi API trong một Fragment (thứ tự các bước):
+### Mẫu một màn danh sách có gọi API
 
-```java
-stateView.showLoading();
-ApiClient.get(requireContext()).create(DanhMucApi.class).layDanhMuc().enqueue(new Callback<List<DanhMuc>>() {
-    @Override public void onResponse(Call<List<DanhMuc>> call, Response<List<DanhMuc>> res) {
-        if (res.isSuccessful()) {
-            adapter.submit(res.body());
-            stateView.showContent();
-        } else {
-            stateView.showError(LoiApiHelper.doc(res));   // câu "loi" từ server
-        }
-    }
-    @Override public void onFailure(Call<List<DanhMuc>> call, Throwable t) {
-        stateView.showError("Không có kết nối mạng");     // mất mạng, server ngủ, hết thời gian chờ
-    }
-});
+**Layout:** bọc RecyclerView bằng `StateView`. StateView tự thêm vòng xoay, câu thông báo và nút Thử lại đè lên trên.
+
+```xml
+<com.app.homeserve.common.StateView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/state_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_danh_muc"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</com.app.homeserve.common.StateView>
 ```
 
-*Tên hàm (`get`, `layDanhMuc`, `showLoading`, `doc`, ...) chỉ minh họa. Tên thật xem trong code khung.*
+**Fragment:**
+
+```java
+private StateView stateView;
+
+@Override
+public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    stateView = view.findViewById(R.id.state_view);
+    stateView.setOnThuLai(this::taiDuLieu);      // bấm "Thử lại" thì gọi lại API
+    // ... gắn RecyclerView + adapter ...
+    taiDuLieu();
+}
+
+private void taiDuLieu() {
+    stateView.showLoading();
+    ApiClient.get(requireContext()).create(DanhMucApi.class).layDanhMuc().enqueue(new Callback<List<DanhMuc>>() {
+        @Override public void onResponse(Call<List<DanhMuc>> call, Response<List<DanhMuc>> res) {
+            if (!res.isSuccessful()) {
+                stateView.showError(LoiApiHelper.thongBao(res));   // câu "loi" từ server
+            } else if (res.body() == null || res.body().isEmpty()) {
+                stateView.showEmpty("Chưa có danh mục nào");
+            } else {
+                adapter.submit(res.body());
+                stateView.showContent();
+            }
+        }
+        @Override public void onFailure(Call<List<DanhMuc>> call, Throwable t) {
+            stateView.showError(LoiApiHelper.LOI_MANG);   // mất mạng, server ngủ, hết thời gian chờ
+        }
+    });
+}
+```
+
+*`DanhMucApi.layDanhMuc()` và `adapter.submit()` là hàm Thông tự viết. `ApiClient`, `StateView`, `LoiApiHelper` là tên thật trong khung.*
 
 ---
 
@@ -257,13 +291,15 @@ ApiClient.get(requireContext()).create(DanhMucApi.class).layDanhMuc().enqueue(ne
 
 ### Giá trị cố định (có trong `HangSo.java`)
 
-| Trường | Giá trị | Hiện cho người dùng |
-|---|---|---|
-| Vai trò | `KHACH`, `THO`, `QUAN_TRI` | Khách hàng, Thợ, Quản trị |
-| `ho_so_tho.trang_thai_duyet` | `CHO_DUYET`, `DA_DUYET`, `TU_CHOI` | Chờ duyệt, Đã duyệt, Từ chối |
-| `yeu_cau.trang_thai` | `CHO_NHAN`, `DA_NHAN`, `DANG_LAM`, `HOAN_TAT`, `HUY` | Chờ nhận, Đã nhận, Đang làm, Hoàn tất, Đã hủy |
-| `phan_cong.trang_thai` | `CHO_THO_NHAN`, `DA_NHAN`, `TU_CHOI` | Chờ thợ nhận, Thợ đã nhận, Thợ từ chối |
-| `khieu_nai.trang_thai` | `MOI`, `DANG_XU_LY`, `DA_XU_LY` | Mới, Đang xử lý, Đã xử lý |
+| Trường | Trong code | Giá trị | `HangSo.tenHienThi()` trả về |
+|---|---|---|---|
+| Vai trò | `HangSo.VaiTro.*` | `KHACH`, `THO`, `QUAN_TRI` | Khách hàng, Thợ, Quản trị |
+| `ho_so_tho.trang_thai_duyet` | `HangSo.TrangThaiDuyet.*` | `CHO_DUYET`, `DA_DUYET`, `TU_CHOI` | Chờ duyệt, Đã duyệt, Từ chối |
+| `yeu_cau.trang_thai` | `HangSo.TrangThaiYeuCau.*` | `CHO_NHAN`, `DA_NHAN`, `DANG_LAM`, `HOAN_TAT`, `HUY` | Chờ nhận, Đã nhận, Đang làm, Hoàn tất, Đã hủy |
+| `phan_cong.trang_thai` | `HangSo.TrangThaiPhanCong.*` | `CHO_THO_NHAN`, `DA_NHAN`, `TU_CHOI` | Chờ thợ nhận, Đã nhận, Từ chối |
+| `khieu_nai.trang_thai` | `HangSo.TrangThaiKhieuNai.*` | `MOI`, `DANG_XU_LY`, `DA_XU_LY` | Mới, Đang xử lý, Đã xử lý |
+
+`DA_NHAN` và `TU_CHOI` có ở 2 nhóm, nên `HangSo` chia theo nhóm: gõ `HangSo.TrangThaiYeuCau.` là Android Studio chỉ gợi ý đúng 5 mã của yêu cầu.
 
 Đơn chỉ được đi theo thứ tự `CHO_NHAN → DA_NHAN → DANG_LAM → HOAN_TAT`. Hủy (`HUY`) chỉ được khi chưa tới `DANG_LAM`. **Chỉ hiện nút cho bước tiếp theo hợp lệ.** Ví dụ đơn đang `DA_NHAN` thì chỉ hiện "Bắt đầu làm", không hiện "Hoàn tất". Server vẫn kiểm tra lại và trả `409` nếu sai.
 
@@ -272,6 +308,43 @@ ApiClient.get(requireContext()).create(DanhMucApi.class).layDanhMuc().enqueue(ne
 ## 5. Chi tiết từng màn hình của Thông
 
 Mỗi màn hình bên dưới ghi: **file cần tạo → màn hình hiện gì → bấm vào làm gì → gọi API nào → lỗi phải xử lý → yêu cầu môn học nó đáp ứng**.
+
+### 5.0 `auth/LoginActivity`: Đăng nhập *(tuần 10, mốc kiểm tra tuần 11)*
+
+Thông đã làm bản đầu trên nhánh `android-lam-truoc`. Chuyển vào `ui/auth/LoginActivity.java` + `activity_login.xml` có sẵn trong khung, làm trên nhánh `android-dang-nhap`.
+
+**File:**
+```
+ui/auth/LoginActivity.java          activity_login.xml
+data/model/YeuCauDangNhap.java      (gửi lên)
+data/model/KetQuaDangNhap.java      (nhận về)
+data/model/NguoiDung.java           (bên trong KetQuaDangNhap)
+data/api/AuthApi.java               thêm hàm dangNhap
+```
+
+**API:** `POST /auth/dang-nhap`. Gửi `{ "email", "mat_khau" }`, nhận `{ "token", "nguoi_dung": { "id", "ho_ten", "vai_tro" } }`.
+
+**Màn hình:** ô Email, ô Mật khẩu, nút Đăng nhập, vòng xoay khi đang gửi.
+
+| Bước | Làm gì |
+|---|---|
+| Bấm Đăng nhập | Kiểm tra trên app: email không rỗng + đúng định dạng (`Patterns.EMAIL_ADDRESS`), mật khẩu không rỗng. Sai thì `setError` ngay dưới ô, **không** dùng Toast, không gọi API |
+| Đang gửi | Hiện vòng xoay, **khóa nút** Đăng nhập để không bấm 2 lần |
+| Thành công, vai trò `QUAN_TRI` / `THO` | `TokenStore.get(this).luu(token, vaiTro, hoTen)` rồi `DieuHuong.moManChinh(this, vaiTro)` |
+| Thành công, vai trò `KHACH` | **Không lưu gì**, báo *"Tài khoản này dùng app khách hàng"* |
+| Server báo lỗi (401 sai mật khẩu, 400...) | `LoiApiHelper.doc(res)`: có `truong` thì `setError` ở ô đó, không thì hiện `thongBao` |
+| Mất mạng | `LoiApiHelper.LOI_MANG` |
+
+**Bắt buộc:** model dùng `@SerializedName` vì server dùng snake_case:
+```java
+@SerializedName("mat_khau") public String matKhau;
+@SerializedName("nguoi_dung") public NguoiDung nguoiDung;
+@SerializedName("ho_ten") public String hoTen;
+@SerializedName("vai_tro") public String vaiTro;
+```
+Thiếu `@SerializedName` thì server không thấy mật khẩu (trả 400), và app đọc về `nguoiDung` bằng `null`.
+
+**Thử:** đăng nhập bằng tài khoản Quản trị → vào 4 tab Quản trị. Tắt app mở lại → vào thẳng, không hỏi đăng nhập (Splash đọc token). Tài khoản Thợ → vào 2 tab Thợ. Sai mật khẩu → hiện *"Email hoặc mật khẩu không đúng"*.
 
 ### 5.1 `admin/danhmuc/`: Danh mục và bảng giá *(tuần 10–11, mốc kiểm tra)*
 
@@ -461,7 +534,7 @@ Giảng viên chấm theo danh sách này:
 
 | Yêu cầu | Ai | Ở đâu |
 |---|---|---|
-| Đăng nhập + phân quyền ≥ 2 vai trò | Tuấn | `auth/`, 2 MainActivity |
+| Đăng nhập + phân quyền ≥ 2 vai trò | **Thông** (Login) + Tuấn (Splash, 2 MainActivity) | `auth/`, `DieuHuong` |
 | ≥ 2 danh sách dùng RecyclerView | **Thông** | Danh mục, dịch vụ, bàn phân việc, việc của thợ, ... |
 | Fragment hoặc nhiều Activity | Tuấn + **Thông** | |
 | Form có kiểm tra hợp lệ đầy đủ | **Thông** | `DichVuFormActivity`, `TaoBaoGiaActivity` |
@@ -485,8 +558,9 @@ Giảng viên chấm theo danh sách này:
 
 | Tuần | Việc | Mục |
 |---|---|---|
+| 9–10 | Chuyển bàn phân việc từ nhánh cũ vào khung (theo hướng dẫn Tuấn gửi), rồi Đăng nhập | 5.5, 5.0 |
 | 10 | Danh mục + dịch vụ + form + xóa. Chưa có API thì dùng dữ liệu giả trước | 5.1 |
-| **11** | **Mốc kiểm tra (không nộp bù):** màn danh mục chạy bằng **API thật** | 5.1 |
+| **11** | **Mốc kiểm tra (không nộp bù):** đăng nhập + màn danh mục chạy bằng **API thật** | 5.0, 5.1 |
 | 12 | Hồ sơ thợ, duyệt hồ sơ, việc của thợ | 5.2, 5.3, 5.4 |
 | 13 | Bàn phân việc + thợ phù hợp, báo giá thợ, báo giá vượt trần | 5.5, 5.6, 5.7 |
 | 14 | Khiếu nại, chạy lại danh sách tự kiểm ở mọi màn hình | 5.8, 6 |
