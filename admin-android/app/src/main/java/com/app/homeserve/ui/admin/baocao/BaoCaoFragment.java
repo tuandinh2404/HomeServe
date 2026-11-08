@@ -6,6 +6,8 @@ import com.app.homeserve.R;
 
 public class BaoCaoFragment extends Fragment {
     public BaoCaoFragment() {
-        super(R.layout.fragment_admin_baocao)
+
+        super(R.layout.fragment_admin_baocao);
+        
     }
 }
