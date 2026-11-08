@@ -1,4 +1,4 @@
-package com.app.homeserve.models;
+package com.app.homeserve.data.model;
 
 public class YeuCau {
     public int id;
