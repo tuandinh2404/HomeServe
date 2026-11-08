@@ -212,7 +212,7 @@ Mẫu gọi API trong một Fragment (thứ tự các bước):
 
 ```java
 stateView.showLoading();
-ApiClient.get().create(DanhMucApi.class).layDanhMuc().enqueue(new Callback<List<DanhMuc>>() {
+ApiClient.get(requireContext()).create(DanhMucApi.class).layDanhMuc().enqueue(new Callback<List<DanhMuc>>() {
     @Override public void onResponse(Call<List<DanhMuc>> call, Response<List<DanhMuc>> res) {
         if (res.isSuccessful()) {
             adapter.submit(res.body());
