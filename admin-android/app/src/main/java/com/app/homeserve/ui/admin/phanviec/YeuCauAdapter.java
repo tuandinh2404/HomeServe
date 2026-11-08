@@ -1,4 +1,4 @@
-package com.app.homeserve.adapters;
+package com.app.homeserve.ui.admin.phanviec;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,7 +7,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.app.homeserve.R;
-import com.app.homeserve.models.YeuCau;
+import com.app.homeserve.data.model.YeuCau;
 import java.util.List;
 
 public class YeuCauAdapter extends RecyclerView.Adapter<YeuCauAdapter.YeuCauViewHolder> {
