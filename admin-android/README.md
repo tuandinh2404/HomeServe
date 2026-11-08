@@ -67,8 +67,8 @@ app/src/main/java/com/app/homeserve/
 │   ├── LoiApiHelper.java         Đọc {"loi": "...", "truong": "..."} từ response lỗi       ✅ đã có
 │   ├── StateView.java            Khung 3 trạng thái: đang tải / có dữ liệu / rỗng / lỗi    ✅ đã có
 │   ├── DieuHuong.java            Mở màn chính theo vai trò, mở màn đăng nhập             ✅ đã có
-│   ├── XacNhanDialog.java        Hộp xác nhận trước khi xóa hoặc làm việc không hoàn tác được
-│   └── TienTe.java               Định dạng 150000 → "150.000 đ"
+│   ├── XacNhanDialog.java        Hộp hỏi lại trước khi xóa / từ chối / giao việc           ✅ đã có
+│   └── TienTe.java               150000 → "150.000 đ", đọc lại số từ ô nhập               ✅ đã có
 └── ui/
     ├── auth/                     [Tuấn]   SplashActivity    [THÔNG]  LoginActivity
     ├── admin/
@@ -207,8 +207,8 @@ Tên hàm cụ thể xem trong code khung. Bảng dưới cho biết **file nào
 | `LoiApiHelper` | Response không thành công (400, 403, 404, 409, 500) | `LoiApiHelper.thongBao(res)` → câu để hiện. Cần biết ô nào sai thì `LoiApiHelper.doc(res)` → `.thongBao` + `.truong`. Mất mạng dùng `LoiApiHelper.LOI_MANG`. Mỗi response chỉ đọc lỗi **1 lần** |
 | `StateView` | Mọi màn hình có gọi API | Bọc RecyclerView trong layout (xem mẫu dưới). `showLoading()` → `showContent()` / `showEmpty("...")` / `showError("...")`. Gắn `setOnThuLai(...)` thì lỗi có nút **Thử lại** |
 | `DieuHuong` | Sau khi đăng nhập xong | `DieuHuong.moManChinh(this, vaiTro)` tự mở Admin hoặc Thợ và xóa màn cũ. Trả `false` nếu vai trò là `KHACH` / lạ |
-| `XacNhanDialog` | Xóa, từ chối, duyệt, gán thợ | Chỉ gọi API sau khi người dùng bấm đồng ý |
-| `TienTe` | Hiện số tiền | Gửi lên API vẫn là số nguyên `150000` |
+| `XacNhanDialog` | Xóa, từ chối, duyệt, gán thợ | Xóa: `XacNhanDialog.hoiXoa(requireContext(), "danh mục Điện", () -> goiApiXoa(dm))` → *"Xóa danh mục Điện?"* [Hủy] [Xóa]. Việc khác: `XacNhanDialog.hoi(ctx, "Giao việc cho Nguyễn Văn B?", null, "Giao việc", () -> ...)`. **Gọi API bên trong `() -> ...`**, đoạn đó chỉ chạy khi người dùng bấm đồng ý |
+| `TienTe` | Hiện số tiền, đọc số tiền từ ô nhập | `TienTe.hien(150000)` → "150.000 đ". `TienTe.khoang(giaSan, giaTran)` → "80.000 – 150.000 đ". `TienTe.doc(edtGia.getText().toString())` → `150000`, hoặc `null` nếu người dùng gõ sai (form báo lỗi ô đó). Gửi lên API vẫn là số nguyên `long` |
 
 ### Mẫu một màn danh sách có gọi API
 
@@ -362,7 +362,7 @@ DichVuFormActivity.java     activity_dich_vu_form.xml
 - Nút **+** (FloatingActionButton): hộp nhập tên → tạo danh mục mới.
 - Bấm vào một dòng: mở `DichVuListActivity` của danh mục đó.
 - Nhấn giữ một dòng: menu **Sửa tên** / **Xóa**.
-- Xóa: `XacNhanDialog` "Xóa danh mục Điện?" → đồng ý mới gọi API.
+- Xóa: `XacNhanDialog.hoiXoa(requireContext(), "danh mục " + dm.ten, () -> xoaDanhMuc(dm))` → đồng ý mới gọi API.
 
 | Thao tác | API |
 |---|---|
@@ -374,9 +374,9 @@ DichVuFormActivity.java     activity_dich_vu_form.xml
 Lỗi phải xử lý: `409` khi trùng tên → báo dưới ô nhập. `409` khi xóa danh mục còn dịch vụ → hiện `loi` ("Danh mục còn dịch vụ, không xóa được"), **không** bỏ dòng khỏi danh sách.
 
 **Màn danh sách dịch vụ** (`DichVuListActivity`)
-- RecyclerView, mỗi dòng: tên dịch vụ, đơn vị, **"80.000 đ – 150.000 đ / cái"** (giá sàn – giá trần).
+- RecyclerView, mỗi dòng: tên dịch vụ, đơn vị, **"80.000 – 150.000 đ / cái"** (giá sàn – giá trần): `TienTe.khoang(dv.giaSan, dv.giaTran) + " / " + dv.donVi`.
 - Nút **+**: mở `DichVuFormActivity` để thêm. Bấm một dòng: mở form để sửa.
-- Nhấn giữ → Xóa → `XacNhanDialog`.
+- Nhấn giữ → Xóa → `XacNhanDialog.hoiXoa(...)`.
 
 | Thao tác | API |
 |---|---|
@@ -390,7 +390,7 @@ Lỗi phải xử lý: `409` khi trùng tên → báo dưới ô nhập. `409` k
 | Tên | chữ | Không rỗng, tối đa 100 ký tự |
 | Mô tả | chữ nhiều dòng | Không bắt buộc |
 | Đơn vị | chữ (cái, m², lần, giờ) | Không rỗng |
-| Giá sàn | số | Bắt buộc, > 0 |
+| Giá sàn | số | Bắt buộc, > 0. Đọc bằng `TienTe.doc(...)`: trả `null` → báo *"Nhập số tiền hợp lệ"* |
 | Giá trần | số | Bắt buộc, **≥ giá sàn** |
 
 - Kiểm tra ngay khi bấm **Lưu**. Sai ô nào thì `setError` ở ô đó, không gọi API.
