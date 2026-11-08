@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 2 tab của Thợ -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
+    <item
+        android:id="@+id/tab_viec"
+        android:icon="@drawable/ic_tab_viec"
+        android:title="@string/tab_viec" />
+    <item
+        android:id="@+id/tab_ho_so"
+        android:icon="@drawable/ic_tab_ho_so"
+        android:title="@string/tab_ho_so" />
 </menu>
