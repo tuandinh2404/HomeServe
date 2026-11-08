@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@android:color/white">
+
+    <TextView
+        android:id="@+id/tvTieuDeDialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Phân công thợ"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:id="@+id/tvChiTietSuaChua"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sửa máy lạnh - Quận 1"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chọn thợ (Cùng khu vực/nghề):"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- Nơi hiển thị danh sách thợ -->
+    <Spinner
+        android:id="@+id/spinnerTho"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#EEEEEE"
+        android:layout_marginBottom="24dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/btnHuy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hủy"
+            style="?android:attr/buttonBarButtonStyle"
+            android:textColor="#757575"/>
+
+        <Button
+            android:id="@+id/btnGiaoViec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Giao Việc"
+            android:textColor="#4CAF50"
+            style="?android:attr/buttonBarButtonStyle"/>
+    </LinearLayout>
+</LinearLayout>
