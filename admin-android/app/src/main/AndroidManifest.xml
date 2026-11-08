@@ -12,6 +12,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Homeserveandroid">
         <activity
+            android:name=".ui.admin.danhmuc.DichVuFormActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.danhmuc.DichVuListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.tho.ThoMainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.AdminMainActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
