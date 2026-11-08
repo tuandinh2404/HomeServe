@@ -13,6 +13,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "BASE_URL", "\"https://homeserve-api.onrender.com/\"")
+
     }
 
     buildTypes {
@@ -28,9 +31,20 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
+    buildFeatures {
+        buildConfig = true   // bật để dùng được BuildConfig.BASE_URL trong code Java
+    }
+
 }
 
 dependencies {
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp.logging)
+    implementation(libs.recyclerview)
+    implementation(libs.mpandroidchart)
+
 
     implementation(libs.appcompat)
     implementation(libs.material)

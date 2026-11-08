@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">homeserve-android</string>
+
+    <!-- Tên các tab dưới đáy -->
+    <string name="tab_phan_viec">Phân việc</string>
+    <string name="tab_danh_muc">Danh mục</string>
+    <string name="tab_duyet">Duyệt</string>
+    <string name="tab_bao_cao">Báo cáo</string>
+    <string name="tab_viec">Việc của tôi</string>
+    <string name="tab_ho_so">Hồ sơ</string>
+
+    <!-- 3 tab con trong tab "Duyệt" -->
+    <string name="duyet_ho_so_tho">Hồ sơ thợ</string>
+    <string name="duyet_bao_gia">Báo giá</string>
+    <string name="duyet_khieu_nai">Khiếu nại</string>
 </resources>

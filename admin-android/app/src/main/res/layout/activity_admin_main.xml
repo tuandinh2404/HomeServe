@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Vỏ màn hình chính: khung nội dung ở trên, thanh tab ở dưới.
+     fitsSystemWindows: chừa chỗ cho thanh trạng thái và thanh điều hướng của điện thoại,
+     nếu không, Android 15 trở lên sẽ vẽ nội dung đè lên chúng. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <!-- Fragment của tab đang chọn được gắn vào đây -->
+    <FrameLayout
+        android:id="@+id/khung_noi_dung"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/thanh_tab"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/menu_admin" />
+
+</LinearLayout>
