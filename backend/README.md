@@ -32,7 +32,7 @@ Tuấn đã làm sẵn phần đầu để Tâm có mẫu nhìn theo:
 1. Đọc mục 1, chạy được server trên máy, mở `http://localhost:3000/danh-muc-dv` thấy 6 danh mục.
 2. Mở `sql/schema.sql`, đọc chú thích từng bảng. Đây là "bản đồ" cho mọi API sau này.
 3. Mở `routes/dichVu.ts`: đây là **mẫu chuẩn** (đọc tham số, kiểm tra, `pool.query` với `$1`, `throw loi...`, trả JSON). Viết API mới thì copy cách làm ở đây.
-4. Việc đầu tiên của Tâm: **thêm / sửa / xóa danh mục và dịch vụ** (chỉ `QUAN_TRI`), sau khi Tuấn xong middleware đăng nhập. Đường dẫn và mã lỗi xem bảng *"Quản lý danh mục và dịch vụ"* trong `api.md`.
+4. Việc đầu tiên của Tâm: **thêm / sửa / xóa danh mục và dịch vụ** (chỉ `QUAN_TRI`, dùng `canDangNhap, chiCho("QUAN_TRI")` như mẫu ở mục 3). Đường dẫn và mã lỗi xem bảng *"Quản lý danh mục và dịch vụ"* trong `api.md`.
 5. Song song: bổ sung `seed.sql` cho đủ yêu cầu đề (xem mục 4).
 
 Không hiểu chỗ nào trong code mẫu thì hỏi Tuấn **trước khi** viết tiếp.
@@ -79,11 +79,11 @@ backend/
 │   ├── db.ts              [Tuấn] pool kết nối CSDL + hàm giaoDich() cho transaction   ✅
 │   ├── loi.ts             [Tuấn] LoiApi, loi.saiDuLieu(...), xử lý lỗi chung           ✅
 │   ├── middleware/
-│   │   └── xacThuc.ts     [Tuấn] canDangNhap, chiCho("QUAN_TRI")                        (bước B3)
+│   │   └── xacThuc.ts     [Tuấn] canDangNhap, chiCho("QUAN_TRI"), taoToken              ✅
 │   └── routes/
 │       ├── index.ts       [Tuấn] Gom mọi router. Thêm file router mới thì đăng ký ở đây
 │       ├── health.ts      [Tuấn] GET /health (hỏi thử CSDL)                              ✅
-│       ├── auth.ts        [Tuấn] /auth/dang-ky, /auth/dang-nhap, /auth/toi
+│       ├── auth.ts        [Tuấn] /auth/dang-ky, /auth/dang-nhap, /auth/toi              ✅
 │       ├── danhMuc.ts     [TÂM]  /danh-muc-dv                       (GET ✅, thêm/sửa/xóa: Tâm)
 │       ├── dichVu.ts      [TÂM]  /dich-vu, /dich-vu/:id/bang-gia    (GET ✅, thêm/sửa/xóa: Tâm)
 │       ├── hoSoTho.ts     [TÂM]  /tho/ho-so, /ho-so-tho
@@ -97,7 +97,8 @@ backend/
 │       └── baoCao.ts      [Tuấn] /bao-cao/*, /tho/:id/cong-no
 ├── sql/
 │   ├── schema.sql         13 bảng, chạy lại được từ đầu (DROP rồi CREATE)                ✅
-│   └── seed.sql           [TÂM]  Dữ liệu mẫu. Đã có khu vực, danh mục, dịch vụ; Tâm bổ sung phần còn lại
+│   ├── seed.sql           [TÂM]  Dữ liệu mẫu. Đã có khu vực, danh mục, dịch vụ; Tâm bổ sung phần còn lại
+│   └── seed-tai-khoan.sql [Tuấn] Tài khoản thử mỗi vai trò, chạy lại được không xóa gì       ✅
 ├── api.md                 Tài liệu API (nguồn chuẩn)
 ├── .env.example           Danh sách biến môi trường (không có giá trị thật)
 └── README.md
@@ -120,7 +121,7 @@ import { Router } from "express";
 
 import { pool } from "../db.js";
 import { loi } from "../loi.js";
-import { canDangNhap, chiCho } from "../middleware/xacThuc.js";   // có từ bước B3
+import { canDangNhap, chiCho } from "../middleware/xacThuc.js";
 
 export const danhMucRouter = Router();
 
@@ -202,12 +203,28 @@ Trong `giaoDich` phải dùng **`client.query`**, **không** dùng `pool.query`.
   | Danh mục | 6 | ✅ 6 |
   | Dịch vụ có bảng giá | 40 | ✅ 42 |
   | Khu vực | (không yêu cầu) | ✅ 17 |
-  | Thợ | 25 | ⏳ cần mật khẩu băm bcrypt, làm sau API đăng ký |
+  | Thợ | 25 | ⏳ 2 (trong `seed-tai-khoan.sql`). Tâm thêm cho đủ 25 |
   | Yêu cầu đủ 5 trạng thái | 120 | ⏳ |
   | Đánh giá | 80 | ⏳ |
 
-  Có ít nhất 1 tài khoản mỗi vai trò để thử (ghi vào README của 2 app). 120 yêu cầu thì đừng gõ tay từng dòng: dùng `generate_series` + `random()` trong SQL để sinh hàng loạt.
-- Chạy: Supabase → **SQL Editor** → dán nội dung file → **Run**. Chạy `schema.sql` trước, `seed.sql` sau.
+  120 yêu cầu thì đừng gõ tay từng dòng: dùng `generate_series` + `random()` trong SQL để sinh hàng loạt. Thợ mẫu dùng chung mật khẩu băm như trong `seed-tai-khoan.sql` (mật khẩu `123456`).
+- `sql/seed-tai-khoan.sql`: tài khoản thử, **chạy lại nhiều lần được**, không xóa dữ liệu khác.
+- Chạy: Supabase → **SQL Editor** → dán nội dung file → **Run**. Thứ tự: `schema.sql` → `seed.sql` → `seed-tai-khoan.sql`. Chạy lại `schema.sql` là **xóa sạch**, phải chạy lại cả 2 file seed.
+
+### Tài khoản thử (mật khẩu đều là `123456`)
+
+| Vai trò | Email | Ghi chú |
+|---|---|---|
+| Quản trị | `quantri@homeserve.vn` | App Android |
+| Thợ đã duyệt | `tho.dien@homeserve.vn` | App Android. Nghề Điện, Quận 1, 4.8 sao |
+| Thợ chờ duyệt | `tho.choduyet@homeserve.vn` | App Android. Nghề Nước, Quận 3, để thử màn duyệt hồ sơ |
+| Khách hàng | `khach@homeserve.vn` | App Flutter (app Android sẽ chặn) |
+
+### Gọi API cần đăng nhập (thử bằng Postman)
+
+1. `POST /auth/dang-nhap` với body JSON `{"email":"quantri@homeserve.vn","mat_khau":"123456"}` → copy `token`.
+2. Ở request khác: tab **Authorization** → Type **Bearer Token** → dán token.
+3. Thử phân quyền đúng như thầy sẽ thử: đăng nhập bằng `khach@...` rồi gọi API chỉ dành cho quản trị → phải ra **403**.
 - Tiền là `INTEGER` (VND). Thời gian là `TIMESTAMPTZ`. Mật khẩu chỉ lưu dạng băm bcrypt (`mat_khau_hash`).
 
 Thiết kế bảng chi tiết: xem bản thiết kế CSDL nhóm đã chốt.
@@ -242,7 +259,7 @@ Phải chạy xong **không báo lỗi**. Render cũng chạy đúng lệnh này
 | Tuần | Tuấn | Tâm |
 |---|---|---|
 | 9 | Khung (`db`, `loi`, routes) ✅, `schema.sql` ✅, seed danh mục / dịch vụ ✅, 3 API xem ✅ | Đọc README + code mẫu, chạy được trên máy |
-| 10 | Deploy Render ✅, đăng ký / đăng nhập | Sửa thứ tự id + bật RLS trong `sql/`, thêm / sửa / xóa danh mục + dịch vụ, bổ sung `seed.sql` |
+| 10 | Deploy Render ✅, đăng ký / đăng nhập ✅ | Sửa thứ tự id + bật RLS trong `sql/`, thêm / sửa / xóa danh mục + dịch vụ (đã có `chiCho` để dùng), bổ sung `seed.sql` |
 | **11** | **Mốc kiểm tra:** backend đã deploy, 3 API thật (đăng nhập, danh mục, dịch vụ / bảng giá) | |
 | 12–13 | Đánh giá, khiếu nại, báo cáo, công nợ | Hồ sơ thợ, yêu cầu, phân công + thợ phù hợp, báo giá vượt trần, thanh toán, tải ảnh |
 | 14–15 | Dữ liệu mẫu đủ số lượng, sửa lỗi, kiểm tra phân quyền bằng Postman | |
