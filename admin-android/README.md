@@ -32,7 +32,7 @@ Khách hàng **không** dùng app này. Khách dùng app Flutter.
 
 1. Mở Android Studio → **Open** → chọn thư mục `admin-android/`. Không mở thư mục gốc của repo.
 2. Chờ Gradle sync xong. Sync lỗi thì chụp màn hình gửi Tuấn, đừng tự đổi phiên bản thư viện.
-3. Địa chỉ backend nằm trong `app/build.gradle.kts`, dòng `buildConfigField("String", "BASE_URL", ...)`. **Không tự sửa dòng này.** Khi đổi server, Tuấn sẽ sửa.
+3. Địa chỉ backend nằm trong `app/build.gradle.kts`, dòng `buildConfigField("String", "BASE_URL", ...)`, hiện là **`https://homeserve-vm96.onrender.com/`**. **Không tự sửa dòng này.** Khi đổi server, Tuấn sẽ sửa. Mở link đó + `health` trên trình duyệt điện thoại thấy `{"ok":true,...}` là server đang chạy.
 4. Chạy trên điện thoại thật hoặc máy ảo. Lần đầu gọi API có thể mất khoảng 30–50 giây, vì server Render miễn phí ngủ sau 15 phút không dùng. Đây không phải lỗi app.
 
 Tài khoản thử (có trong `seed.sql` của backend):

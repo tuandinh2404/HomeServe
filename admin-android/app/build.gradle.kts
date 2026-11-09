@@ -14,7 +14,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "BASE_URL", "\"https://homeserve-api.onrender.com/\"")
+        buildConfigField("String", "BASE_URL", "\"https://homeserve-vm96.onrender.com/\"")
 
     }
 
