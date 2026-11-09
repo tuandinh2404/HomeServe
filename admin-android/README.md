@@ -33,15 +33,16 @@ Khách hàng **không** dùng app này. Khách dùng app Flutter.
 1. Mở Android Studio → **Open** → chọn thư mục `admin-android/`. Không mở thư mục gốc của repo.
 2. Chờ Gradle sync xong. Sync lỗi thì chụp màn hình gửi Tuấn, đừng tự đổi phiên bản thư viện.
 3. Địa chỉ backend nằm trong `app/build.gradle.kts`, dòng `buildConfigField("String", "BASE_URL", ...)`, hiện là **`https://homeserve-vm96.onrender.com/`**. **Không tự sửa dòng này.** Khi đổi server, Tuấn sẽ sửa. Mở link đó + `health` trên trình duyệt điện thoại thấy `{"ok":true,...}` là server đang chạy.
-4. Chạy trên điện thoại thật hoặc máy ảo. Lần đầu gọi API có thể mất khoảng 30–50 giây, vì server Render miễn phí ngủ sau 15 phút không dùng. Đây không phải lỗi app.
+4. Chạy trên điện thoại thật hoặc máy ảo. Server đã có UptimeRobot gọi định kỳ nên thường không ngủ. Nếu lần đầu gọi API mất 30–50 giây thì là server vừa khởi động lại (vd ngay sau khi merge backend), không phải lỗi app.
 
-Tài khoản thử (có trong `seed.sql` của backend):
+Tài khoản thử (có trong `sql/seed-tai-khoan.sql` của backend), **mật khẩu đều là `123456`**:
 
-| Vai trò | Email | Mật khẩu |
+| Vai trò | Email | Ghi chú |
 |---|---|---|
-| Quản trị | *(Tuấn điền)* | |
-| Thợ đã duyệt | *(Tuấn điền)* | |
-| Thợ chờ duyệt | *(Tuấn điền)* | |
+| Quản trị | `quantri@homeserve.vn` | Vào 4 tab Quản trị |
+| Thợ đã duyệt | `tho.dien@homeserve.vn` | Vào 2 tab Thợ. Nghề Điện, Quận 1 |
+| Thợ chờ duyệt | `tho.choduyet@homeserve.vn` | Vào 2 tab Thợ, hồ sơ đang chờ duyệt |
+| Khách hàng | `khach@homeserve.vn` | Dùng để thử **bị chặn**: app phải báo *"Tài khoản này dùng app khách hàng"* |
 
 ---
 
