@@ -8,7 +8,8 @@ REST API dùng chung cho **app Admin (Android)** và **app Khách hàng (Flutter
 | Khung | Express 5 |
 | CSDL | PostgreSQL trên Supabase, truy cập bằng thư viện `pg`, **viết SQL tay** |
 | Xác thực | JWT + bcrypt |
-| Chạy ở | Render (Web Service gói Free) |
+| Chạy ở | Render (Web Service gói Free, Singapore) |
+| **Link API** | **https://homeserve-vm96.onrender.com** (thử: `/health`, `/danh-muc-dv`) |
 | Tài liệu API | `api.md` trong thư mục này. **Đây là nguồn chuẩn**: đường dẫn, tên trường, mã lỗi đều theo file này |
 
 ### Ai làm gì
@@ -44,6 +45,7 @@ Không hiểu chỗ nào trong code mẫu thì hỏi Tuấn **trước khi** vi�
 cd backend
 npm install
 ```
+Nếu mở thẳng thư mục `backend` bằng VS Code thì terminal đã đứng sẵn trong đó, không cần gõ `cd backend`, chỉ cần `npm install`.
 Tạo file `.env` bằng cách copy `.env.example`, rồi **xin Tuấn các giá trị** (nhắn riêng, không gửi vào nhóm chung).
 
 ```
@@ -54,6 +56,14 @@ Mở trình duyệt vào `http://localhost:3000/health`:
 - `{"ok":false,...}` (mã 503) → server chạy nhưng không kết nối được CSDL. Xem mục 7.
 
 `npm run dev` tự khởi động lại mỗi khi lưu file.
+
+### Bản đang chạy trên Internet
+
+**https://homeserve-vm96.onrender.com**. Đây là link 2 app gọi tới và link nộp cho thầy.
+- **Tự deploy:** mỗi khi có PR merge vào nhánh `backend`, Render tự build và chạy bản mới sau 2–4 phút. Không cần làm gì thêm.
+- Build trên Render lỗi thì bản cũ vẫn chạy. Tuấn xem log trong trang Render.
+- Biến môi trường trên Render do Tuấn quản lý. Cần thêm biến mới thì nhắn Tuấn.
+- Máy cá nhân (`localhost`) và Render **dùng chung một CSDL Supabase**. Thử xóa / sửa dữ liệu trên máy là mất trên bản thật luôn, cẩn thận.
 
 ⚠️ **Không bao giờ commit file `.env`.** Nó có mật khẩu CSDL và khóa toàn quyền của Supabase. `.gitignore` đã chặn sẵn. Lỡ commit rồi thì báo Tuấn **đổi mật khẩu ngay**: xóa file thôi chưa đủ, vì Git vẫn giữ lịch sử.
 
@@ -232,7 +242,7 @@ Phải chạy xong **không báo lỗi**. Render cũng chạy đúng lệnh này
 | Tuần | Tuấn | Tâm |
 |---|---|---|
 | 9 | Khung (`db`, `loi`, routes) ✅, `schema.sql` ✅, seed danh mục / dịch vụ ✅, 3 API xem ✅ | Đọc README + code mẫu, chạy được trên máy |
-| 10 | Đăng ký / đăng nhập, deploy Render | Thêm / sửa / xóa danh mục + dịch vụ, bổ sung `seed.sql` |
+| 10 | Deploy Render ✅, đăng ký / đăng nhập | Sửa thứ tự id + bật RLS trong `sql/`, thêm / sửa / xóa danh mục + dịch vụ, bổ sung `seed.sql` |
 | **11** | **Mốc kiểm tra:** backend đã deploy, 3 API thật (đăng nhập, danh mục, dịch vụ / bảng giá) | |
 | 12–13 | Đánh giá, khiếu nại, báo cáo, công nợ | Hồ sơ thợ, yêu cầu, phân công + thợ phù hợp, báo giá vượt trần, thanh toán, tải ảnh |
 | 14–15 | Dữ liệu mẫu đủ số lượng, sửa lỗi, kiểm tra phân quyền bằng Postman | |
