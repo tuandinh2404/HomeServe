@@ -16,4 +16,19 @@
 
     <!-- Nút trong StateView khi tải lỗi -->
     <string name="thu_lai">Thử lại</string>
+
+    <!-- Màn hình đăng nhập -->
+    <string name="login_title">HomeServe Admin</string>
+    <string name="login_subtitle">Đăng nhập để quản lý hệ thống</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Mật khẩu</string>
+    <string name="btn_login">Đăng nhập</string>
+
+    <!-- Thông báo lỗi / kết quả đăng nhập -->
+    <string name="error_email_required">Vui lòng nhập email</string>
+    <string name="error_email_invalid">Email không hợp lệ</string>
+    <string name="error_password_required">Vui lòng nhập mật khẩu</string>
+    <string name="error_password_short">Mật khẩu tối thiểu 6 ký tự</string>
+    <string name="login_success">Đăng nhập thành công!</string>
+    <string name="role_not_supported">Vai trò này chưa được hỗ trợ</string>
 </resources>
