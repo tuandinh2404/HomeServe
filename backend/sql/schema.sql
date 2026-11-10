@@ -200,3 +200,17 @@ CREATE TABLE cau_hinh (
   gia_tri TEXT        NOT NULL
 );
 INSERT INTO cau_hinh (khoa, gia_tri) VALUES ('ti_le_hoa_hong', '0.10');   -- sàn thu 10% mỗi đơn
+-- Bật RLS cho toàn bộ bảng ứng dụng.
+ALTER TABLE public.nguoi_dung ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.khu_vuc ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.danh_muc_dv ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.dich_vu ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ho_so_tho ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.yeu_cau ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.phan_cong ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.bao_gia_chi_tiet ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.thanh_toan ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.nop_hoa_hong ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.danh_gia ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.khieu_nai ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cau_hinh ENABLE ROW LEVEL SECURITY;

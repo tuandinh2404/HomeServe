@@ -78,4 +78,5 @@ FROM (VALUES
   ('Khóa - Cửa', 'Sửa cửa nhôm kính trượt', 'Thay bánh xe, chỉnh ray', 'cánh', 150000, 350000),
   ('Khóa - Cửa', 'Lắp tay co thủy lực', 'Lắp tay đóng cửa tự động', 'cái', 150000, 300000)
 ) AS v (danh_muc, ten, mo_ta, don_vi, gia_san, gia_tran)
-JOIN danh_muc_dv dm ON dm.ten = v.danh_muc;
+JOIN danh_muc_dv dm ON dm.ten = v.danh_muc
+ORDER BY dm.id, v.ten;
