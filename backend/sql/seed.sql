@@ -80,3 +80,139 @@ FROM (VALUES
 ) AS v (danh_muc, ten, mo_ta, don_vi, gia_san, gia_tran)
 JOIN danh_muc_dv dm ON dm.ten = v.danh_muc
 ORDER BY dm.id, v.ten;
+  
+  -- Mục 8: dữ liệu mẫu cho cơ sở dữ liệu demo mới.
+BEGIN;
+
+DO $$
+DECLARE
+  khu_vuc_mau_id integer;
+  khach_mau_id integer;
+  tho_mau_ids integer[] := ARRAY[]::integer[];
+  dich_vu_mau_ids integer[] := ARRAY[]::integer[];
+  tho_mau_id integer;
+  yeu_cau_mau_id integer;
+  dich_vu_mau record;
+  vi_tri_tho integer;
+  trang_thai_don text;
+  tao_luc_mau timestamptz;
+  lich_hen_mau timestamptz;
+  diem_khach integer;
+BEGIN
+  SELECT id INTO khu_vuc_mau_id
+  FROM khu_vuc
+  ORDER BY id
+  LIMIT 1;
+
+  IF khu_vuc_mau_id IS NULL THEN
+    RAISE EXCEPTION 'Cần có ít nhất một khu vực trước khi tạo dữ liệu Mục 8';
+  END IF;
+
+  -- Tài khoản mẫu phục vụ hiển thị dữ liệu, không dùng để đăng nhập.
+  INSERT INTO nguoi_dung (email, mat_khau_hash, ho_ten, vai_tro)
+  VALUES ('seed8-khach@example.invalid', 'SEED_NO_LOGIN', 'Khách mẫu', 'KHACH')
+  RETURNING id INTO khach_mau_id;
+
+  -- Mỗi thợ được gắn với một dịch vụ thuộc đúng nghề của mình.
+  FOR i IN 1..25 LOOP
+    SELECT id, danh_muc_id INTO dich_vu_mau
+    FROM dich_vu
+    ORDER BY id
+    OFFSET (i - 1)
+    LIMIT 1;
+
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Cần ít nhất 25 dịch vụ trước khi tạo dữ liệu Mục 8';
+    END IF;
+
+    INSERT INTO nguoi_dung (email, mat_khau_hash, ho_ten, vai_tro)
+    VALUES (
+      format('seed8-tho-%s@example.invalid', i),
+      'SEED_NO_LOGIN',
+      format('Thợ mẫu %s', i),
+      'THO'
+    )
+    RETURNING id INTO tho_mau_id;
+
+    INSERT INTO ho_so_tho (
+      nguoi_dung_id, nghe_id, kinh_nghiem_nam, khu_vuc_id, trang_thai_duyet
+    )
+    VALUES (
+      tho_mau_id, dich_vu_mau.danh_muc_id, 1 + i % 10,
+      khu_vuc_mau_id, 'DA_DUYET'
+    );
+
+    tho_mau_ids := array_append(tho_mau_ids, tho_mau_id);
+    dich_vu_mau_ids := array_append(dich_vu_mau_ids, dich_vu_mau.id);
+  END LOOP;
+
+  FOR i IN 1..120 LOOP
+    vi_tri_tho := 1 + (i - 1) % 25;
+    tho_mau_id := tho_mau_ids[vi_tri_tho];
+    tao_luc_mau := now() - (121 - i) * interval '1 day';
+    lich_hen_mau := tao_luc_mau + interval '1 day';
+
+    trang_thai_don := CASE
+      WHEN i <= 20 THEN 'CHO_NHAN'
+      WHEN i <= 40 THEN 'DA_NHAN'
+      WHEN i <= 60 THEN 'DANG_LAM'
+      WHEN i <= 100 THEN 'HOAN_TAT'
+      ELSE 'HUY'
+    END;
+
+    INSERT INTO yeu_cau (
+      khach_id, dich_vu_id, khu_vuc_id, mo_ta, dia_chi,
+      thoi_gian_mong_muon, trang_thai, tao_luc
+    )
+    VALUES (
+      khach_mau_id, dich_vu_mau_ids[vi_tri_tho], khu_vuc_mau_id,
+      format('Yêu cầu sửa chữa mẫu %s', i),
+      format('Địa chỉ minh họa %s', i),
+      lich_hen_mau, trang_thai_don, tao_luc_mau
+    )
+    RETURNING id INTO yeu_cau_mau_id;
+
+    IF trang_thai_don IN ('DA_NHAN', 'DANG_LAM', 'HOAN_TAT') THEN
+      INSERT INTO phan_cong (
+        yeu_cau_id, tho_id, trang_thai,
+        thoi_gian_du_kien_toi, phan_cong_luc, nhan_luc
+      )
+      VALUES (
+        yeu_cau_mau_id, tho_mau_id, 'DA_NHAN',
+        lich_hen_mau, tao_luc_mau + interval '1 hour',
+        tao_luc_mau + interval '2 hours'
+      );
+    END IF;
+
+    -- 40 đơn hoàn tất, mỗi đơn có hai đánh giá.
+    IF trang_thai_don = 'HOAN_TAT' THEN
+      diem_khach := 3 + i % 3;
+
+      INSERT INTO danh_gia (
+        yeu_cau_id, nguoi_danh_gia_id, nguoi_duoc_danh_gia_id,
+        so_sao, noi_dung, tao_luc
+      )
+      VALUES
+        (yeu_cau_mau_id, khach_mau_id, tho_mau_id,
+         diem_khach, 'Khách đánh giá công việc của thợ', lich_hen_mau),
+        (yeu_cau_mau_id, tho_mau_id, khach_mau_id,
+         4 + i % 2, 'Thợ đánh giá khách hàng', lich_hen_mau);
+    END IF;
+  END LOOP;
+
+  UPDATE ho_so_tho hs
+  SET so_viec = thong_ke.so_viec,
+      diem_tb = thong_ke.diem_tb
+  FROM (
+    SELECT nguoi_duoc_danh_gia_id,
+           count(*)::integer AS so_viec,
+           round(avg(so_sao), 1) AS diem_tb
+    FROM danh_gia
+    WHERE nguoi_danh_gia_id = khach_mau_id
+      AND nguoi_duoc_danh_gia_id = ANY(tho_mau_ids)
+    GROUP BY nguoi_duoc_danh_gia_id
+  ) AS thong_ke
+  WHERE hs.nguoi_dung_id = thong_ke.nguoi_duoc_danh_gia_id;
+END $$;
+
+COMMIT;
