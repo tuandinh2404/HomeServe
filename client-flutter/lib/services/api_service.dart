@@ -9,7 +9,10 @@ import 'mock_data.dart';
 /// Lớp truy cập API. Mặc định dùng dữ liệu mẫu (mock) để UI chạy được
 /// ngay cả khi backend chưa deploy. Đặt [useMock] = false để gọi backend thật.
 class ApiService {
-  static bool useMock = true;
+  // Công tắc dữ liệu giả theo từng nhóm API. Nhóm nào backend đã làm xong thì đặt false.
+  static bool mockAuth = false;     // đăng nhập, đăng ký, /auth/toi: server đã có
+  static bool mockDanhMuc = false;  // danh mục, dịch vụ, bảng giá: server đã có
+  static bool mockYeuCau = true;    // yêu cầu, hủy...: chờ backend làm xong
   static String baseUrl = AppConstants.apiBaseUrl;
   static String? token;
 
@@ -20,11 +23,12 @@ class ApiService {
 
   // ---------- Auth ----------
   static Future<User> login(String email, String matKhau) async {
-    if (useMock) {
+    if (mockAuth) {
       await Future.delayed(const Duration(milliseconds: 600));
       if (email.isEmpty || matKhau.length < 6) {
         throw Exception('Email hoặc mật khẩu không đúng');
       }
+      token = 'mock-token';
       return MockData.demoUser;
     }
     final res = await http.post(
@@ -39,7 +43,7 @@ class ApiService {
   }
 
   static Future<User> register(String email, String matKhau, String hoTen, String sdt) async {
-    if (useMock) {
+    if (mockAuth) {
       await Future.delayed(const Duration(milliseconds: 600));
       return User(id: 99, email: email, hoTen: hoTen, sdt: sdt, vaiTro: 'KHACH');
     }
@@ -53,7 +57,7 @@ class ApiService {
   }
 
   static Future<User?> me() async {
-    if (useMock) {
+    if (mockAuth) {
       await Future.delayed(const Duration(milliseconds: 300));
       return MockData.demoUser;
     }
@@ -65,7 +69,7 @@ class ApiService {
 
   // ---------- Danh mục / dịch vụ ----------
   static Future<List<ServiceCategory>> categories() async {
-    if (useMock) {
+    if (mockDanhMuc) {
       await Future.delayed(const Duration(milliseconds: 400));
       return MockData.categories;
     }
@@ -76,7 +80,7 @@ class ApiService {
   }
 
   static Future<List<Service>> services({int? danhMucId}) async {
-    if (useMock) {
+    if (mockDanhMuc) {
       await Future.delayed(const Duration(milliseconds: 400));
       if (danhMucId == null) return MockData.services;
       return MockData.services.where((s) => s.danhMucId == danhMucId).toList();
@@ -91,7 +95,7 @@ class ApiService {
   }
 
   static Future<Service> serviceDetail(int id) async {
-    if (useMock) {
+    if (mockDanhMuc) {
       await Future.delayed(const Duration(milliseconds: 300));
       return MockData.services.firstWhere((s) => s.id == id);
     }
@@ -114,7 +118,7 @@ class ApiService {
     String? thoiGianMongMuon,
     List<String> hinhAnh = const [],
   }) async {
-    if (useMock) {
+    if (mockYeuCau) {
       await Future.delayed(const Duration(milliseconds: 700));
       final sv = MockData.services.firstWhere((s) => s.id == dichVuId);
       final r = ServiceRequest(
@@ -154,7 +158,7 @@ class ApiService {
   }
 
   static Future<List<ServiceRequest>> myRequests() async {
-    if (useMock) {
+    if (mockYeuCau) {
       await Future.delayed(const Duration(milliseconds: 400));
       return List.of(_mockRequests);
     }
@@ -165,7 +169,7 @@ class ApiService {
   }
 
   static Future<ServiceRequest> requestDetail(int id) async {
-    if (useMock) {
+    if (mockYeuCau) {
       await Future.delayed(const Duration(milliseconds: 300));
       return _mockRequests.firstWhere((r) => r.id == id,
           orElse: () => ServiceRequest(
@@ -183,7 +187,7 @@ class ApiService {
   }
 
   static Future<void> cancelRequest(int id) async {
-    if (useMock) {
+    if (mockYeuCau) {
       await Future.delayed(const Duration(milliseconds: 400));
       final idx = _mockRequests.indexWhere((r) => r.id == id);
       if (idx >= 0) {
