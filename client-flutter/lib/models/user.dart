@@ -21,7 +21,7 @@ class User {
         hoTen: j['ho_ten'] ?? j['hoTen'] ?? '',
         sdt: j['sdt'],
         vaiTro: j['vai_tro'] ?? j['vaiTro'] ?? 'KHACH',
-        anhDaiDien: j['anh_dai_dien'] ?? j['anhDaiDien'],
+        anhDaiDien: j['anh_dai_dien_url'] ?? j['anh_dai_dien'] ?? j['anhDaiDien'],
       );
 
   Map<String, dynamic> toJson() => {
