@@ -1,6 +1,6 @@
 class AppConstants {
   static const String appName = 'HomeServe';
-  static const String apiBaseUrl = 'http://10.0.2.2:3000'; // Android emulator -> localhost
+  static const String apiBaseUrl = 'https://homeserve-vm96.onrender.com'; // server thật trên Render, KHÔNG có dấu / ở cuối
   static const String tokenKey = 'homeserve_token';
   static const String userKey = 'homeserve_user';
 
