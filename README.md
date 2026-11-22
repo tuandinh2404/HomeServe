@@ -8,6 +8,7 @@ INT4211 – Lập trình trên các thiết bị di động · HK261 · Đồ á
 |---|---|
 | API đang chạy | **https://homeserve-vm96.onrender.com** (kiểm tra: [`/health`](https://homeserve-vm96.onrender.com/health), [`/danh-muc-dv`](https://homeserve-vm96.onrender.com/danh-muc-dv)) |
 | Bản phân tích tuần 9 (PDF) | [docs/tuan9/Chot-phan-tich-tuan9.pdf](docs/tuan9/Chot-phan-tich-tuan9.pdf) |
+| **Phân công hiện tại** | [PHAN-CONG.md](PHAN-CONG.md): mỗi người đang làm gì, việc gấp, việc tiếp theo |
 
 ## Các nhánh
 
